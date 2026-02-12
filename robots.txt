@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://p1buddy.com/sitemap.xml
