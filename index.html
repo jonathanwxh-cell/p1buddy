@@ -5,6 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>P1Buddy — Singapore P1 School Registration Planner</title>
   <meta name="description" content="Enter your postal code. See your odds at every nearby primary school. Free P1 registration probability tool for Singapore parents.">
+  <meta name="keywords" content="P1 registration Singapore, primary school registration, P1 balloting, school admission odds, Singapore primary school calculator, MOE P1, Phase 2C balloting">
+  <meta property="og:title" content="P1Buddy — See Your P1 School Odds">
+  <meta property="og:description" content="Enter your postal code. See your chances at every nearby primary school. Free tool with 3 years of MOE balloting data.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://p1buddy.com">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="P1Buddy — Singapore P1 School Registration Planner">
+  <meta name="twitter:description" content="Enter your postal code. See your odds at every nearby primary school.">
+  <link rel="canonical" href="https://p1buddy.com">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PLACEHOLDER"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PLACEHOLDER');</script>
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
@@ -62,6 +76,13 @@
     .loading .spinner { display: inline-block; width: 2rem; height: 2rem; border: 3px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     
+    .share-bar { text-align: center; padding: 1.5rem 1rem 0; display: none; }
+    .share-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 2rem; font-size: 0.95rem; font-weight: 600; text-decoration: none; color: white; }
+    .share-whatsapp { background: #25D366; }
+    .share-whatsapp:hover { background: #1da851; }
+    .share-copy { background: #64748b; cursor: pointer; border: none; color: white; font-size: 0.95rem; font-weight: 600; }
+    .share-copy:hover { background: #475569; }
+    
     .footer { text-align: center; padding: 2rem 1rem; color: #94a3b8; font-size: 0.8rem; }
     .footer a { color: #3b82f6; text-decoration: none; }
     
@@ -107,6 +128,13 @@
       <h2>Nearby Primary Schools</h2>
       <p class="subtitle" id="resultsSubtitle"></p>
       <div id="schoolList"></div>
+    </div>
+    
+    <div class="share-bar" id="shareBar">
+      <p style="color:#64748b;margin-bottom:0.75rem;font-size:0.9rem;">Know other parents stressing about P1? Share this tool 👇</p>
+      <a class="share-btn share-whatsapp" href="#" id="whatsappShare" target="_blank">📱 Share on WhatsApp</a>
+      &nbsp;
+      <button class="share-btn share-copy" onclick="copyLink()">📋 Copy Link</button>
     </div>
     
     <div class="info-section">
@@ -270,7 +298,21 @@
       }).join('');
       
       document.getElementById('schoolList').innerHTML = html;
+      
+      // Show share bar
+      document.getElementById('shareBar').style.display = 'block';
+      const shareText = encodeURIComponent(`Check your P1 school odds! I just found out which schools near me ballot and which are safe 🎒 https://p1buddy.com`);
+      document.getElementById('whatsappShare').href = `https://wa.me/?text=${shareText}`;
+      
       updatePhaseHighlight();
+    }
+    
+    function copyLink() {
+      navigator.clipboard.writeText('https://p1buddy.com').then(() => {
+        const btn = event.target;
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => btn.textContent = '📋 Copy Link', 2000);
+      });
     }
     
     function updatePhaseHighlight() {
