@@ -113,7 +113,7 @@
 <body>
   <div class="hero">
     <h1>🎒 P1Buddy</h1>
-    <p>Enter your postal code. See your personalised odds at every nearby school.</p>
+    <p>Enter your postal code. See how competitive every nearby school has been — for your situation.</p>
     <div class="search-box">
       <input type="text" id="postalInput" placeholder="Enter postal code (e.g. 569930)" maxlength="6" inputmode="numeric">
       <button onclick="search()">Find Schools</button>
@@ -359,33 +359,33 @@
       
       // All years safe
       if (safeYears === totalYears) {
-        return { class: 'safe', emoji: '🟢', label: 'Safe', desc: `Got in every year (${totalYears}yr) as ${priorityLabel(userPri)}` };
+        return { class: 'safe', emoji: '🟢', label: 'Comfortable', desc: `Historically, ${priorityLabel(userPri)} got in all ${totalYears} years without balloting` };
       }
       
       // Mostly cut off
       if (cutoffYears === totalYears) {
-        return { class: 'risky', emoji: '🔴', label: 'Very Low', desc: `Filled before ${cit} ${distance<=1000?'<1km':distance<=2000?'1-2km':'>2km'} in all ${totalYears} years` };
+        return { class: 'risky', emoji: '🔴', label: 'Unlikely', desc: `Historically filled before ${cit} ${distance<=1000?'<1km':distance<=2000?'1-2km':'>2km'} were considered — all ${totalYears} years` };
       }
       
       if (cutoffYears > 0 && ballotYears === 0 && safeYears === 0) {
-        return { class: 'risky', emoji: '🔴', label: 'Very Low', desc: `Cutoff before your priority all ${totalYears} years` };
+        return { class: 'risky', emoji: '🔴', label: 'Unlikely', desc: `Historically, places filled before your priority group in all ${totalYears} years` };
       }
       
       // Mix of ballot + cutoff
       if (cutoffYears > 0) {
-        return { class: 'risky', emoji: '🔴', label: 'Low', desc: `Cut off ${cutoffYears}/${totalYears}yr, balloted ${ballotYears}/${totalYears}yr` };
+        return { class: 'risky', emoji: '🔴', label: 'Tough', desc: `Historically: not reached ${cutoffYears}/${totalYears}yr, balloted ${ballotYears}/${totalYears}yr` };
       }
       
       // Some ballot years, no cutoff
       if (ballotYears === totalYears) {
-        return { class: 'moderate', emoji: '🟡', label: 'Ballot', desc: `Had to ballot every year (${totalYears}yr)` };
+        return { class: 'moderate', emoji: '🟡', label: 'Competitive', desc: `Would have needed to ballot every year (${totalYears}yr)` };
       }
       
       if (ballotYears > 0) {
-        return { class: 'moderate', emoji: '🟡', label: 'Mixed', desc: `Safe ${safeYears}yr, ballot ${ballotYears}yr out of ${totalYears}` };
+        return { class: 'moderate', emoji: '🟡', label: 'Mixed', desc: `Historically: no ballot ${safeYears}yr, needed ballot ${ballotYears}yr out of ${totalYears}` };
       }
       
-      return { class: 'safe', emoji: '🟢', label: 'Safe', desc: `Got in ${safeYears}/${totalYears} years` };
+      return { class: 'safe', emoji: '🟢', label: 'Comfortable', desc: `Historically got in ${safeYears}/${totalYears} years without balloting` };
     }
     
     function getGenericOdds(school, phase) {
@@ -469,7 +469,7 @@
         } else {
           const personalOdds = getPersonalisedOdds(s, selectedPhase, s.distance);
           personalHtml = `<div class="personal-odds ${personalOdds.class}">
-            <strong>${personalOdds.emoji} Your odds (Phase ${selectedPhase === '2CS' ? '2C(S)' : selectedPhase}, ${cit}, ${bandLabel}): ${personalOdds.label}</strong>
+            <strong>${personalOdds.emoji} Your outlook (Phase ${selectedPhase === '2CS' ? '2C(S)' : selectedPhase}, ${cit}, ${bandLabel}): ${personalOdds.label}</strong>
             ${personalOdds.desc}
           </div>`;
         }
