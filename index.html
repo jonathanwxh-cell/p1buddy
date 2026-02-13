@@ -141,7 +141,7 @@
         <div class="profile-group">
           <h4>Registration Phase</h4>
           <label><input type="radio" name="phase" value="1" onchange="refreshResults()"> <strong>Phase 1</strong> — Sibling in school</label>
-          <label><input type="radio" name="phase" value="2A" onchange="refreshResults()"> <strong>Phase 2A</strong> — Alumni / staff</label>
+          <label><input type="radio" name="phase" value="2A" onchange="refreshResults()"> <strong>Phase 2A</strong> — Alumni / staff / advisory committee / MOE Kindergarten</label>
           <label><input type="radio" name="phase" value="2B" onchange="refreshResults()"> <strong>Phase 2B</strong> — Volunteer / church-clan / community leader</label>
           <label><input type="radio" name="phase" value="2C" onchange="refreshResults()" checked> <strong>Phase 2C</strong> — Open to all SC/PR</label>
         </div>
@@ -182,6 +182,13 @@
       </ol>
       <p style="margin-top:0.5rem;">This means citizenship matters more than distance. A PR within 1km still queues behind all SCs.</p>
     </div>
+
+    <div class="info-section" style="margin-top:1rem;">
+      <h3>⚠️ Important rules to know</h3>
+      <p><strong>30-month stay requirement:</strong> If your child gains admission through distance priority, your family must continue living at the registered address for at least 30 months from the start of registration (1 July). Failing this may result in transfer to another school.</p>
+      <p><strong>Distance measurement:</strong> MOE measures walking distance to the school's nearest pedestrian gate — not straight-line distance. This tool uses straight-line estimates which may differ. Always verify with <a href="https://www.onemap.gov.sg" target="_blank">OneMap</a> or MOE's calculator.</p>
+      <p><strong>Phase 2C Supplementary:</strong> Only for children still unplaced after Phase 2C. If your child secures a spot in 2C, you cannot register again in 2C(S) at a different school.</p>
+    </div>
   </div>
   
   <div class="footer">
@@ -197,28 +204,12 @@
     
     // Priority order: SC<1=1, SC1-2=2, SC>2=3, PR<1=4, PR1-2=5, PR>2=6
     const PRIORITY_ORDER = {
-      'SC<1': 1, 'SC1-2': 2, 'SC<2': 2, 'SC>2': 3,
-      'PR<1': 4, 'PR1-2': 5, 'PR<2': 5, 'PR>2': 6,
+      'SC<1': 1, 'SC1-2': 2, 'SC<2': 1, 'SC>2': 3, 'SC': 3,
+      'PR<1': 4, 'PR1-2': 5, 'PR<2': 4, 'PR>2': 6, 'PR': 6,
       // Handle variants with # suffix (partial ballot)
-      'SC<1#': 1, 'SC1-2#': 2, 'SC<2#': 2, 'SC>2#': 3, 'SC#': 3,
-      'PR<1#': 4, 'PR1-2#': 5, 'PR<2#': 5, 'PR>2#': 6
+      'SC<1#': 1, 'SC1-2#': 2, 'SC<2#': 1, 'SC>2#': 3, 'SC#': 3,
+      'PR<1#': 4, 'PR1-2#': 5, 'PR<2#': 4, 'PR>2#': 6, 'PR#': 6
     };
-    
-    function getUserPriority() {
-      const cit = document.querySelector('input[name="citizenship"]:checked')?.value || 'SC';
-      const distBand = getDistanceBand();
-      if (!distBand) return null;
-      
-      if (cit === 'SC') {
-        if (distBand === 'within-1km') return 1;
-        if (distBand === 'within-2km') return 2;
-        return 3;
-      } else {
-        if (distBand === 'within-1km') return 4;
-        if (distBand === 'within-2km') return 5;
-        return 6;
-      }
-    }
     
     function getDistanceBandForSchool(distance) {
       if (distance <= 1000) return 'within-1km';
@@ -245,11 +236,19 @@
       return labels[p] || 'Unknown';
     }
     
-    function getDistanceBand() {
-      // Returns band based on currently hovered/selected — not used per-school
-      return null;
+    function humanBallotInfo(code) {
+      if (!code) return '';
+      const map = {
+        'SC<1': 'SC ≤1km balloted', 'SC1-2': 'SC 1-2km balloted', 'SC>2': 'SC >2km balloted',
+        'SC<2': 'SC ≤2km balloted', 'SC': 'All SC balloted',
+        'PR<1': 'PR ≤1km balloted', 'PR1-2': 'PR 1-2km balloted', 'PR>2': 'PR >2km balloted',
+        'PR<2': 'PR ≤2km balloted', 'PR': 'All PR balloted'
+      };
+      const base = code.replace(/#.*$/, '');
+      const partial = code.includes('#') ? '*' : '';
+      return (map[base] || code) + partial;
     }
-    
+
     // Load data
     fetch('data/schools-combined.json')
       .then(r => r.json())
@@ -319,10 +318,10 @@
         const phaseData = phases[phase];
         if (!phaseData) continue;
         
-        // For 2CS: 0 vacancies + 0 applicants = school filled before this phase
-        if (phase === '2CS' && phaseData.vacancies === 0 && phaseData.applicants === 0) {
+        // 0 vacancies + 0 applicants = school filled before this phase
+        if (phaseData.vacancies === 0 && phaseData.applicants === 0) {
           totalYears++;
-          cutoffYears++; // School was full — you have no chance
+          cutoffYears++; // School was full — no chance in this phase
           continue;
         }
         
@@ -396,8 +395,8 @@
         const phaseData = phases[phase];
         if (!phaseData) continue;
         
-        // 2CS: 0/0 = school filled before this phase
-        if (phase === '2CS' && phaseData.vacancies === 0 && phaseData.applicants === 0) {
+        // 0/0 = school filled before this phase
+        if (phaseData.vacancies === 0 && phaseData.applicants === 0) {
           totalYears++;
           filledCount++;
           continue;
@@ -465,7 +464,7 @@
         // Personalised odds for selected phase
         let personalHtml = '';
         if (selectedPhase === '1') {
-          personalHtml = `<div class="personal-odds safe"><strong>Phase 1 — Sibling priority</strong>Guaranteed admission. No balloting needed.</div>`;
+          personalHtml = `<div class="personal-odds safe"><strong>Phase 1 — Sibling priority</strong>Virtually guaranteed — balloting is extremely rare in Phase 1. Historical Phase 1 data not tracked by this tool.</div>`;
         } else {
           const personalOdds = getPersonalisedOdds(s, selectedPhase, s.distance);
           personalHtml = `<div class="personal-odds ${personalOdds.class}">
@@ -498,12 +497,12 @@
           const cols = phases.map(p => {
             const d = s.history[y]?.[p];
             if (!d) return '<td>-</td>';
-            // 2CS with 0/0 = school was full
-            if (p === '2CS' && d.vacancies === 0 && d.applicants === 0) {
+            // 0/0 = school was full before this phase
+            if (d.vacancies === 0 && d.applicants === 0) {
               return '<td style="color:#dc2626;font-weight:600">Full</td>';
             }
             const style = d.oversubscribed ? 'color:#dc2626;font-weight:600' : 'color:#16a34a';
-            const ballotDetail = d.ballotInfo ? ` <span style="font-size:0.7rem;color:#64748b;">${d.ballotInfo}</span>` : '';
+            const ballotDetail = d.ballotInfo ? ` <span style="font-size:0.65rem;color:#64748b;">${humanBallotInfo(d.ballotInfo)}</span>` : '';
             return `<td style="${style}">${d.applicants}/${d.vacancies}${d.balloted ? ' ⚡' : ''}${ballotDetail}</td>`;
           }).join('');
           return `<tr><td><strong>${y}</strong></td>${cols}</tr>`;
@@ -546,7 +545,7 @@
       
       const phaseNames = {
         '1': 'Phase 1 — guaranteed (sibling priority)',
-        '2A': 'Phase 2A — alumni / staff connection',
+        '2A': 'Phase 2A — alumni / staff / advisory committee / MOE Kindergarten',
         '2B': 'Phase 2B — volunteer / church-clan / community leader',
         '2C': 'Phase 2C — open to all, most competitive'
       };
