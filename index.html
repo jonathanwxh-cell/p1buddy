@@ -4,20 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>P1Buddy — Singapore P1 School Registration Planner</title>
-  <meta name="description" content="Enter your postal code. See your odds at every nearby primary school. Free P1 registration probability tool for Singapore parents.">
+  <meta name="description" content="Enter your postal code. See your personalised odds at every nearby primary school based on citizenship and distance. Free P1 registration probability tool for Singapore parents.">
   <meta name="keywords" content="P1 registration Singapore, primary school registration, P1 balloting, school admission odds, Singapore primary school calculator, MOE P1, Phase 2C balloting">
   <meta property="og:title" content="P1Buddy — See Your P1 School Odds">
-  <meta property="og:description" content="Enter your postal code. See your chances at every nearby primary school. Free tool with 3 years of MOE balloting data.">
+  <meta property="og:description" content="Enter your postal code. See your personalised chances at every nearby primary school. Free tool with 3 years of MOE balloting data.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://p1buddy.com">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="P1Buddy — Singapore P1 School Registration Planner">
-  <meta name="twitter:description" content="Enter your postal code. See your odds at every nearby primary school.">
+  <meta name="twitter:description" content="Enter your postal code. See your personalised odds at every nearby primary school.">
   <link rel="canonical" href="https://p1buddy.com">
 
   <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PLACEHOLDER"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PLACEHOLDER');</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-59Z85V602C"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-59Z85V602C');</script>
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -34,11 +34,15 @@
     
     .container { max-width: 800px; margin: 0 auto; padding: 1.5rem 1rem; }
     
-    .phase-check { background: white; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: none; }
-    .phase-check h3 { margin-bottom: 1rem; font-size: 1.1rem; }
-    .phase-check label { display: block; padding: 0.5rem 0; cursor: pointer; }
-    .phase-check input[type="radio"] { margin-right: 0.5rem; }
-    .phase-result { margin-top: 1rem; padding: 0.75rem; background: #eff6ff; border-radius: 0.5rem; font-weight: 500; }
+    .profile-section { background: white; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: none; }
+    .profile-section h3 { margin-bottom: 1rem; font-size: 1.1rem; }
+    .profile-row { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .profile-group { flex: 1; min-width: 200px; }
+    .profile-group h4 { font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem; }
+    .profile-group label { display: block; padding: 0.4rem 0; cursor: pointer; font-size: 0.95rem; }
+    .profile-group input[type="radio"] { margin-right: 0.5rem; }
+    .profile-result { margin-top: 0.75rem; padding: 0.75rem; background: #eff6ff; border-radius: 0.5rem; font-weight: 500; font-size: 0.9rem; }
+    .profile-result.warning { background: #fef3c7; color: #92400e; }
     
     .results { display: none; }
     .results h2 { margin-bottom: 0.5rem; }
@@ -53,6 +57,13 @@
     .distance-badge.within-2km { background: #fef9c3; color: #854d0e; }
     .distance-badge.outside-2km { background: #fee2e2; color: #991b1b; }
     
+    .personal-odds { padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.75rem; font-size: 0.9rem; }
+    .personal-odds.safe { background: #dcfce7; border: 1px solid #bbf7d0; }
+    .personal-odds.moderate { background: #fef9c3; border: 1px solid #fde68a; }
+    .personal-odds.risky { background: #fee2e2; border: 1px solid #fecaca; }
+    .personal-odds.na { background: #f1f5f9; border: 1px solid #e2e8f0; color: #64748b; }
+    .personal-odds strong { display: block; margin-bottom: 0.25rem; }
+    
     .phase-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
     .phase-cell { text-align: center; padding: 0.5rem; border-radius: 0.375rem; font-size: 0.8rem; }
     .phase-cell .label { font-weight: 600; margin-bottom: 0.25rem; }
@@ -61,6 +72,9 @@
     .phase-cell.moderate { background: #fef9c3; }
     .phase-cell.risky { background: #fee2e2; }
     .phase-cell.na { background: #f1f5f9; color: #94a3b8; }
+    .phase-cell.highlight { outline: 2.5px solid #3b82f6; outline-offset: -1px; }
+    
+    .school-warning { font-size: 0.8rem; color: #92400e; background: #fef3c7; padding: 0.5rem 0.75rem; border-radius: 0.375rem; margin-top: 0.5rem; }
     
     .history-toggle { color: #3b82f6; cursor: pointer; font-size: 0.85rem; margin-top: 0.5rem; display: inline-block; }
     .history-detail { display: none; margin-top: 0.75rem; font-size: 0.8rem; }
@@ -92,13 +106,14 @@
       .hero h1 { font-size: 1.5rem; }
       .phase-grid { grid-template-columns: repeat(2, 1fr); }
       .search-box { flex-direction: column; }
+      .profile-row { flex-direction: column; gap: 1rem; }
     }
   </style>
 </head>
 <body>
   <div class="hero">
     <h1>🎒 P1Buddy</h1>
-    <p>Enter your postal code. See your odds at every nearby school.</p>
+    <p>Enter your postal code. See your personalised odds at every nearby school.</p>
     <div class="search-box">
       <input type="text" id="postalInput" placeholder="Enter postal code (e.g. 569930)" maxlength="6" inputmode="numeric">
       <button onclick="search()">Find Schools</button>
@@ -112,16 +127,26 @@
     </div>
     
     <div class="disclaimer" id="disclaimer">
-      ⚠️ Based on historical data from 2022-2024. Actual results may vary. This tool provides estimates, not guarantees. Always refer to <a href="https://www.moe.gov.sg/primary/p1-registration" target="_blank">MOE's official site</a>.
+      ⚠️ Based on historical data from 2022-2024. Actual results may vary. Distances shown are straight-line estimates — MOE uses walking distance to the school's nearest gate, which may differ. Always verify with <a href="https://www.onemap.gov.sg/school-query" target="_blank">OneMap</a> or <a href="https://www.moe.gov.sg/primary/p1-registration" target="_blank">MOE's official tools</a>.
     </div>
 
-    <div class="phase-check" id="phaseCheck">
-      <h3>What phase are you eligible for?</h3>
-      <label><input type="radio" name="phase" value="1" onchange="updatePhaseHighlight()"> <strong>Phase 1</strong> — Sibling studying in the school</label>
-      <label><input type="radio" name="phase" value="2A" onchange="updatePhaseHighlight()"> <strong>Phase 2A</strong> — Parent is alumni member / staff / advisory committee</label>
-      <label><input type="radio" name="phase" value="2B" onchange="updatePhaseHighlight()"> <strong>Phase 2B</strong> — Parent volunteer (≥40 hrs) / church-clan member / endorsed by community leader</label>
-      <label><input type="radio" name="phase" value="2C" onchange="updatePhaseHighlight()" checked> <strong>Phase 2C</strong> — Open to all Singapore Citizens / PRs</label>
-      <div class="phase-result" id="phaseResult"></div>
+    <div class="profile-section" id="profileSection">
+      <h3>Tell us about your child</h3>
+      <div class="profile-row">
+        <div class="profile-group">
+          <h4>Citizenship</h4>
+          <label><input type="radio" name="citizenship" value="SC" onchange="refreshResults()" checked> 🇸🇬 Singapore Citizen</label>
+          <label><input type="radio" name="citizenship" value="PR" onchange="refreshResults()"> Permanent Resident (PR)</label>
+        </div>
+        <div class="profile-group">
+          <h4>Registration Phase</h4>
+          <label><input type="radio" name="phase" value="1" onchange="refreshResults()"> <strong>Phase 1</strong> — Sibling in school</label>
+          <label><input type="radio" name="phase" value="2A" onchange="refreshResults()"> <strong>Phase 2A</strong> — Alumni / staff</label>
+          <label><input type="radio" name="phase" value="2B" onchange="refreshResults()"> <strong>Phase 2B</strong> — Volunteer / church-clan / community leader</label>
+          <label><input type="radio" name="phase" value="2C" onchange="refreshResults()" checked> <strong>Phase 2C</strong> — Open to all SC/PR</label>
+        </div>
+      </div>
+      <div class="profile-result" id="profileResult"></div>
     </div>
     
     <div class="results" id="results">
@@ -139,9 +164,23 @@
     
     <div class="info-section">
       <h3>How does P1 registration work?</h3>
-      <p>Singapore P1 registration runs in phases from July-August each year. Priority is given first by phase (sibling > alumni > volunteer > open), then by distance (within 1km > 1-2km > outside 2km), then by citizenship (SC > PR).</p>
-      <p>When more applicants than vacancies exist in a priority group, MOE conducts computerized balloting.</p>
-      <p><strong>This tool uses 3 years of historical data (2022-2024)</strong> to show you which schools near your home have historically had space, and which ones regularly ballot.</p>
+      <p>Singapore P1 registration runs in phases from July-August each year. Priority is given first by phase (sibling > alumni > volunteer > open), then by <strong>citizenship</strong> (SC > PR), then by <strong>distance</strong> (within 1km > 1-2km > outside 2km).</p>
+      <p>When more applicants than vacancies exist, MOE conducts computerized balloting within each priority group. A Singapore Citizen living outside 2km is prioritised over a PR living within 1km.</p>
+      <p><strong>This tool uses 3 years of historical data (2022-2024)</strong> to show your personalised odds based on your citizenship and distance to each school.</p>
+    </div>
+
+    <div class="info-section" style="margin-top:1rem;">
+      <h3>Understanding the priority order</h3>
+      <p>Within each phase, when balloting is needed, places are allocated in this order:</p>
+      <ol style="padding-left:1.5rem;margin:0.75rem 0;color:#475569;font-size:0.9rem;">
+        <li>🇸🇬 SC within 1km</li>
+        <li>🇸🇬 SC between 1-2km</li>
+        <li>🇸🇬 SC outside 2km</li>
+        <li>PR within 1km</li>
+        <li>PR between 1-2km</li>
+        <li>PR outside 2km</li>
+      </ol>
+      <p style="margin-top:0.5rem;">This means citizenship matters more than distance. A PR within 1km still queues behind all SCs.</p>
     </div>
   </div>
   
@@ -154,6 +193,62 @@
   <script>
     let schoolsData = null;
     let userLat = null, userLng = null;
+    let lastPostal = null;
+    
+    // Priority order: SC<1=1, SC1-2=2, SC>2=3, PR<1=4, PR1-2=5, PR>2=6
+    const PRIORITY_ORDER = {
+      'SC<1': 1, 'SC1-2': 2, 'SC<2': 2, 'SC>2': 3,
+      'PR<1': 4, 'PR1-2': 5, 'PR<2': 5, 'PR>2': 6,
+      // Handle variants with # suffix (partial ballot)
+      'SC<1#': 1, 'SC1-2#': 2, 'SC<2#': 2, 'SC>2#': 3, 'SC#': 3,
+      'PR<1#': 4, 'PR1-2#': 5, 'PR<2#': 5, 'PR>2#': 6
+    };
+    
+    function getUserPriority() {
+      const cit = document.querySelector('input[name="citizenship"]:checked')?.value || 'SC';
+      const distBand = getDistanceBand();
+      if (!distBand) return null;
+      
+      if (cit === 'SC') {
+        if (distBand === 'within-1km') return 1;
+        if (distBand === 'within-2km') return 2;
+        return 3;
+      } else {
+        if (distBand === 'within-1km') return 4;
+        if (distBand === 'within-2km') return 5;
+        return 6;
+      }
+    }
+    
+    function getDistanceBandForSchool(distance) {
+      if (distance <= 1000) return 'within-1km';
+      if (distance <= 2000) return 'within-2km';
+      return 'outside-2km';
+    }
+    
+    function getUserPriorityForSchool(distance) {
+      const cit = document.querySelector('input[name="citizenship"]:checked')?.value || 'SC';
+      const band = getDistanceBandForSchool(distance);
+      if (cit === 'SC') {
+        if (band === 'within-1km') return 1;
+        if (band === 'within-2km') return 2;
+        return 3;
+      } else {
+        if (band === 'within-1km') return 4;
+        if (band === 'within-2km') return 5;
+        return 6;
+      }
+    }
+    
+    function priorityLabel(p) {
+      const labels = { 1: 'SC within 1km', 2: 'SC 1-2km', 3: 'SC outside 2km', 4: 'PR within 1km', 5: 'PR 1-2km', 6: 'PR outside 2km' };
+      return labels[p] || 'Unknown';
+    }
+    
+    function getDistanceBand() {
+      // Returns band based on currently hovered/selected — not used per-school
+      return null;
+    }
     
     // Load data
     fetch('data/schools-combined.json')
@@ -176,7 +271,6 @@
       document.getElementById('results').style.display = 'none';
       
       try {
-        // Geocode postal code via OneMap
         const res = await fetch(`https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${postal}&returnGeom=Y&getAddrDetails=Y&pageNum=1`);
         const data = await res.json();
         
@@ -188,6 +282,7 @@
         
         userLat = parseFloat(data.results[0].LATITUDE);
         userLng = parseFloat(data.results[0].LONGITUDE);
+        lastPostal = postal;
         
         displayResults(postal);
       } catch(e) {
@@ -198,6 +293,13 @@
       document.getElementById('loading').style.display = 'none';
     }
     
+    function refreshResults() {
+      if (lastPostal && userLat && userLng) {
+        displayResults(lastPostal);
+      }
+      updateProfileResult();
+    }
+    
     function haversine(lat1, lng1, lat2, lng2) {
       const R = 6371000;
       const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -206,24 +308,124 @@
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
     
-    function getOddsClass(school, phase) {
+    function getPersonalisedOdds(school, phase, distance) {
       const years = school.history;
-      let oversubCount = 0;
-      let totalYears = 0;
+      const userPri = getUserPriorityForSchool(distance);
+      const cit = document.querySelector('input[name="citizenship"]:checked')?.value || 'SC';
+      
+      let safeYears = 0, ballotYears = 0, cutoffYears = 0, totalYears = 0;
       
       for (const [year, phases] of Object.entries(years)) {
-        if (phases[phase]) {
+        const phaseData = phases[phase];
+        if (!phaseData) continue;
+        
+        // For 2CS: 0 vacancies + 0 applicants = school filled before this phase
+        if (phase === '2CS' && phaseData.vacancies === 0 && phaseData.applicants === 0) {
           totalYears++;
-          if (phases[phase].oversubscribed) oversubCount++;
+          cutoffYears++; // School was full — you have no chance
+          continue;
         }
+        
+        totalYears++;
+        
+        if (!phaseData.oversubscribed) {
+          safeYears++; // Everyone got in
+          continue;
+        }
+        
+        // Oversubscribed — check where the ballot cutoff was
+        const ballotInfo = phaseData.ballotInfo;
+        if (!ballotInfo) {
+          ballotYears++; // Oversubscribed but no cutoff info
+          continue;
+        }
+        
+        const cutoffPri = PRIORITY_ORDER[ballotInfo];
+        if (cutoffPri === undefined) {
+          ballotYears++; // Unknown format
+          continue;
+        }
+        
+        if (userPri < cutoffPri) {
+          safeYears++; // User's priority is higher than cutoff — they got in before ballot
+        } else if (userPri === cutoffPri) {
+          ballotYears++; // User was in the ballot group
+        } else {
+          cutoffYears++; // User didn't even get considered
+        }
+      }
+      
+      if (totalYears === 0) return { class: 'na', emoji: 'N/A', label: 'No data', desc: 'No historical data available' };
+      
+      // All years safe
+      if (safeYears === totalYears) {
+        return { class: 'safe', emoji: '🟢', label: 'Safe', desc: `Got in every year (${totalYears}yr) as ${priorityLabel(userPri)}` };
+      }
+      
+      // Mostly cut off
+      if (cutoffYears === totalYears) {
+        return { class: 'risky', emoji: '🔴', label: 'Very Low', desc: `Filled before ${cit} ${distance<=1000?'<1km':distance<=2000?'1-2km':'>2km'} in all ${totalYears} years` };
+      }
+      
+      if (cutoffYears > 0 && ballotYears === 0 && safeYears === 0) {
+        return { class: 'risky', emoji: '🔴', label: 'Very Low', desc: `Cutoff before your priority all ${totalYears} years` };
+      }
+      
+      // Mix of ballot + cutoff
+      if (cutoffYears > 0) {
+        return { class: 'risky', emoji: '🔴', label: 'Low', desc: `Cut off ${cutoffYears}/${totalYears}yr, balloted ${ballotYears}/${totalYears}yr` };
+      }
+      
+      // Some ballot years, no cutoff
+      if (ballotYears === totalYears) {
+        return { class: 'moderate', emoji: '🟡', label: 'Ballot', desc: `Had to ballot every year (${totalYears}yr)` };
+      }
+      
+      if (ballotYears > 0) {
+        return { class: 'moderate', emoji: '🟡', label: 'Mixed', desc: `Safe ${safeYears}yr, ballot ${ballotYears}yr out of ${totalYears}` };
+      }
+      
+      return { class: 'safe', emoji: '🟢', label: 'Safe', desc: `Got in ${safeYears}/${totalYears} years` };
+    }
+    
+    function getGenericOdds(school, phase) {
+      const years = school.history;
+      let oversubCount = 0, totalYears = 0, filledCount = 0;
+      
+      for (const [year, phases] of Object.entries(years)) {
+        const phaseData = phases[phase];
+        if (!phaseData) continue;
+        
+        // 2CS: 0/0 = school filled before this phase
+        if (phase === '2CS' && phaseData.vacancies === 0 && phaseData.applicants === 0) {
+          totalYears++;
+          filledCount++;
+          continue;
+        }
+        
+        totalYears++;
+        if (phaseData.oversubscribed) oversubCount++;
       }
       
       if (totalYears === 0) return { class: 'na', label: 'N/A', desc: 'No data' };
       
-      const pct = ((totalYears - oversubCount) / totalYears * 100).toFixed(0);
-      if (oversubCount === 0) return { class: 'safe', label: '🟢', desc: `Safe — no balloting in ${totalYears}yr` };
-      if (oversubCount < totalYears) return { class: 'moderate', label: '🟡', desc: `Balloted ${oversubCount}/${totalYears} years` };
-      return { class: 'risky', label: '🔴', desc: `Balloted every year (${totalYears}yr)` };
+      // For 2CS, filled = no spots available = risky
+      const totalBad = oversubCount + filledCount;
+      
+      if (totalBad === 0) return { class: 'safe', label: '🟢', desc: `No balloting in ${totalYears}yr` };
+      
+      if (filledCount > 0 && filledCount === totalYears) {
+        return { class: 'risky', label: '🔴', desc: `Full before 2C(S) all ${totalYears}yr` };
+      }
+      
+      if (totalBad < totalYears) {
+        let parts = [];
+        if (oversubCount > 0) parts.push(`balloted ${oversubCount}yr`);
+        if (filledCount > 0) parts.push(`full ${filledCount}yr`);
+        return { class: 'moderate', label: '🟡', desc: `${parts.join(', ')} of ${totalYears}` };
+      }
+      
+      return { class: 'risky', label: '🔴', desc: `Oversubscribed every year (${totalYears}yr)` };
     }
     
     function displayResults(postal) {
@@ -232,34 +434,58 @@
         return;
       }
       
-      // Calculate distances and sort
+      const selectedPhase = document.querySelector('input[name="phase"]:checked')?.value || '2C';
+      const cit = document.querySelector('input[name="citizenship"]:checked')?.value || 'SC';
+      
       const withDistance = schoolsData.map(s => ({
         ...s,
         distance: haversine(userLat, userLng, s.lat, s.lng)
       })).sort((a, b) => a.distance - b.distance);
       
-      // Show schools within 2km, plus next 5
       const nearby = withDistance.filter(s => s.distance <= 2000);
       const extra = withDistance.filter(s => s.distance > 2000).slice(0, 5);
       const display = [...nearby, ...extra];
       
       document.getElementById('disclaimer').style.display = 'block';
-      document.getElementById('phaseCheck').style.display = 'block';
+      document.getElementById('profileSection').style.display = 'block';
       document.getElementById('results').style.display = 'block';
       document.getElementById('resultsSubtitle').textContent = 
-        `${nearby.length} schools within 2km of postal code ${postal}`;
+        `${nearby.length} schools within 2km of postal code ${postal} · Showing odds for ${cit === 'SC' ? '🇸🇬 Singapore Citizen' : 'PR'}`;
       
-      const selectedPhase = document.querySelector('input[name="phase"]:checked')?.value || '2C';
+      updateProfileResult();
+      
+      const phaseForOdds = selectedPhase === '1' ? null : selectedPhase;
       
       const html = display.map((s, idx) => {
         const distKm = (s.distance / 1000).toFixed(2);
-        const band = s.distance <= 1000 ? 'within-1km' : s.distance <= 2000 ? 'within-2km' : 'outside-2km';
-        const bandLabel = s.distance <= 1000 ? 'Within 1km' : s.distance <= 2000 ? '1-2km' : 'Outside 2km';
+        const band = getDistanceBandForSchool(s.distance);
+        const bandLabel = band === 'within-1km' ? 'Within 1km' : band === 'within-2km' ? '1-2km' : 'Outside 2km';
+        const bandClass = band;
         
+        // Personalised odds for selected phase
+        let personalHtml = '';
+        if (selectedPhase === '1') {
+          personalHtml = `<div class="personal-odds safe"><strong>Phase 1 — Sibling priority</strong>Guaranteed admission. No balloting needed.</div>`;
+        } else {
+          const personalOdds = getPersonalisedOdds(s, selectedPhase, s.distance);
+          personalHtml = `<div class="personal-odds ${personalOdds.class}">
+            <strong>${personalOdds.emoji} Your odds (Phase ${selectedPhase === '2CS' ? '2C(S)' : selectedPhase}, ${cit}, ${bandLabel}): ${personalOdds.label}</strong>
+            ${personalOdds.desc}
+          </div>`;
+        }
+        
+        // Warning for Phase 2B community leaders >2km
+        let warningHtml = '';
+        if (selectedPhase === '2B' && s.distance > 2000) {
+          warningHtml = `<div class="school-warning">⚠️ Note: Endorsed community leaders can only register for schools within 2km in Phase 2B. Parent volunteers and church/clan members are not restricted by distance.</div>`;
+        }
+        
+        // Phase grid (generic odds for all phases)
         const phases = ['2A', '2B', '2C', '2CS'];
         const phaseCells = phases.map(p => {
-          const odds = getOddsClass(s, p);
-          return `<div class="phase-cell ${odds.class}">
+          const odds = getGenericOdds(s, p);
+          const isSelected = p === selectedPhase || (p === '2CS' && selectedPhase === '2CS');
+          return `<div class="phase-cell ${odds.class}${isSelected ? ' highlight' : ''}">
             <div class="label">${p === '2CS' ? '2C(S)' : p}</div>
             <div class="odds">${odds.label}</div>
             <div style="font-size:0.7rem;margin-top:0.15rem;">${odds.desc}</div>
@@ -272,8 +498,13 @@
           const cols = phases.map(p => {
             const d = s.history[y]?.[p];
             if (!d) return '<td>-</td>';
+            // 2CS with 0/0 = school was full
+            if (p === '2CS' && d.vacancies === 0 && d.applicants === 0) {
+              return '<td style="color:#dc2626;font-weight:600">Full</td>';
+            }
             const style = d.oversubscribed ? 'color:#dc2626;font-weight:600' : 'color:#16a34a';
-            return `<td style="${style}">${d.applicants}/${d.vacancies}${d.balloted ? ' ⚡' : ''}</td>`;
+            const ballotDetail = d.ballotInfo ? ` <span style="font-size:0.7rem;color:#64748b;">${d.ballotInfo}</span>` : '';
+            return `<td style="${style}">${d.applicants}/${d.vacancies}${d.balloted ? ' ⚡' : ''}${ballotDetail}</td>`;
           }).join('');
           return `<tr><td><strong>${y}</strong></td>${cols}</tr>`;
         }).join('');
@@ -282,10 +513,12 @@
           <div class="school-header">
             <div>
               <div class="school-name">${s.name} Primary School</div>
-              <div class="school-distance">${distKm} km away</div>
+              <div class="school-distance">${distKm} km away (straight-line)</div>
             </div>
-            <span class="distance-badge ${band}">${bandLabel}</span>
+            <span class="distance-badge ${bandClass}">${bandLabel}</span>
           </div>
+          ${personalHtml}
+          ${warningHtml}
           <div class="phase-grid">${phaseCells}</div>
           <span class="history-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">📊 Show year-by-year data</span>
           <div class="history-detail">
@@ -293,19 +526,45 @@
               <thead><tr><th>Year</th><th>2A</th><th>2B</th><th>2C</th><th>2C(S)</th></tr></thead>
               <tbody>${histRows}</tbody>
             </table>
-            <p style="margin-top:0.5rem;color:#64748b;">Format: applicants/vacancies. ⚡ = balloting conducted. <span style="color:#dc2626">Red</span> = oversubscribed.</p>
+            <p style="margin-top:0.5rem;color:#64748b;">Format: applicants/vacancies. ⚡ = balloting. <span style="color:#64748b;font-size:0.75rem;">Ballot cutoff code</span> shows where the queue stopped (e.g. SC<1 = SCs within 1km had to ballot). <span style="color:#dc2626">Red</span> = oversubscribed.</p>
           </div>
         </div>`;
       }).join('');
       
       document.getElementById('schoolList').innerHTML = html;
       
-      // Show share bar
+      // Share bar
       document.getElementById('shareBar').style.display = 'block';
       const shareText = encodeURIComponent(`Check your P1 school odds! I just found out which schools near me ballot and which are safe 🎒 https://p1buddy.com`);
       document.getElementById('whatsappShare').href = `https://wa.me/?text=${shareText}`;
+    }
+    
+    function updateProfileResult() {
+      const phase = document.querySelector('input[name="phase"]:checked')?.value || '2C';
+      const cit = document.querySelector('input[name="citizenship"]:checked')?.value || 'SC';
+      const el = document.getElementById('profileResult');
       
-      updatePhaseHighlight();
+      const phaseNames = {
+        '1': 'Phase 1 — guaranteed (sibling priority)',
+        '2A': 'Phase 2A — alumni / staff connection',
+        '2B': 'Phase 2B — volunteer / church-clan / community leader',
+        '2C': 'Phase 2C — open to all, most competitive'
+      };
+      
+      let msg = `<strong>${cit === 'SC' ? '🇸🇬 Singapore Citizen' : 'Permanent Resident'}</strong> registering in <strong>${phaseNames[phase] || phase}</strong>.`;
+      
+      if (cit === 'PR') {
+        msg += `<br><span style="font-size:0.85rem;">As a PR, you'll queue behind all SCs in your distance band during balloting.</span>`;
+        el.className = 'profile-result warning';
+      } else {
+        el.className = 'profile-result';
+      }
+      
+      if (phase === '1') {
+        msg += `<br><span style="font-size:0.85rem;">Phase 1 is practically guaranteed — very rarely oversubscribed.</span>`;
+      }
+      
+      el.innerHTML = msg;
     }
     
     function copyLink() {
@@ -314,12 +573,6 @@
         btn.textContent = '✅ Copied!';
         setTimeout(() => btn.textContent = '📋 Copy Link', 2000);
       });
-    }
-    
-    function updatePhaseHighlight() {
-      const phase = document.querySelector('input[name="phase"]:checked')?.value || '2C';
-      const phaseMap = { '1': 'Phase 1 — guaranteed admission (sibling priority)', '2A': 'Phase 2A', '2B': 'Phase 2B', '2C': 'Phase 2C — open phase, most competitive' };
-      document.getElementById('phaseResult').innerHTML = `Your phase: <strong>${phaseMap[phase] || phase}</strong>. Look at the ${phase === '1' ? 'Phase 1 is guaranteed — no balloting' : phase + ' column below'}.`;
     }
   </script>
 </body>
