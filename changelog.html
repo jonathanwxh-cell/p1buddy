@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Changelog — P1Buddy</title>
+  <meta name="description" content="P1Buddy version history and changelog. See what's new in each update.">
+  <link rel="canonical" href="https://p1buddy.com/changelog.html">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-59Z85V602C"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-59Z85V602C');</script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;color:#1e293b;line-height:1.6}
+    .hero{background:linear-gradient(135deg,#3b82f6 0%,#1d4ed8 100%);color:#fff;padding:2.5rem 1rem;text-align:center}
+    .hero h1{font-size:1.75rem;margin-bottom:0.25rem}.hero p{opacity:0.9}
+    .container{max-width:700px;margin:0 auto;padding:2rem 1rem}
+    .version{background:#fff;border-radius:0.75rem;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);border-left:4px solid #3b82f6}
+    .version.current{border-left-color:#16a34a}
+    .version h2{font-size:1.2rem;margin-bottom:0.25rem;display:flex;align-items:center;gap:0.5rem}
+    .version .date{font-size:0.85rem;color:#64748b;margin-bottom:0.75rem}
+    .version ul{padding-left:1.25rem;margin:0}.version li{margin-bottom:0.4rem;font-size:0.95rem}
+    .tag{display:inline-block;padding:0.1rem 0.5rem;border-radius:1rem;font-size:0.7rem;font-weight:600;vertical-align:middle}
+    .tag.new{background:#dcfce7;color:#166534}.tag.fix{background:#fef9c3;color:#854d0e}.tag.improve{background:#dbeafe;color:#1e40af}
+    .back{display:inline-block;margin-bottom:1.5rem;color:#3b82f6;text-decoration:none;font-size:0.9rem}
+    .back:hover{text-decoration:underline}
+    .footer{text-align:center;padding:2rem 1rem;color:#94a3b8;font-size:0.8rem}.footer a{color:#3b82f6;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>📋 Changelog</h1>
+    <p>What's new in P1Buddy</p>
+  </div>
+  <div class="container">
+    <a href="/" class="back">← Back to P1Buddy</a>
+
+    <div class="version current">
+      <h2>v2.0 <span class="tag new">Latest</span></h2>
+      <div class="date">13 February 2026</div>
+      <ul>
+        <li><span class="tag new">New</span> <strong>Citizenship toggle</strong> — choose Singapore Citizen or PR to see personalised odds based on MOE's priority order</li>
+        <li><span class="tag new">New</span> <strong>Personalised odds per school</strong> — each school now shows your specific chances based on your citizenship + distance band, not just generic oversubscribed/not</li>
+        <li><span class="tag new">New</span> <strong>Ballot cutoff analysis</strong> — parses historical ballot data to determine whether you would have gotten in, had to ballot, or been cut off before your turn</li>
+        <li><span class="tag new">New</span> <strong>Priority order explainer</strong> — new section explaining how SC > PR > distance works in balloting</li>
+        <li><span class="tag new">New</span> <strong>Ballot cutoff codes</strong> in year-by-year history (e.g. SC<1 = SCs within 1km had to ballot)</li>
+        <li><span class="tag fix">Fix</span> <strong>Phase 2C(S) colour coding</strong> — schools with 0 vacancies in 2C Supplementary now correctly show 🔴 "Full" instead of grey "N/A"</li>
+        <li><span class="tag fix">Fix</span> <strong>Phase 2B >2km warning</strong> — endorsed community leaders are now warned they can only register for schools within 2km</li>
+        <li><span class="tag improve">Improved</span> <strong>Distance disclaimer</strong> — distances are clearly labelled as straight-line estimates, with guidance to verify via OneMap or MOE's official tools</li>
+      </ul>
+    </div>
+
+    <div class="version">
+      <h2>v1.0</h2>
+      <div class="date">13 February 2026</div>
+      <ul>
+        <li><span class="tag new">New</span> <strong>Launch</strong> — P1Buddy goes live at p1buddy.com</li>
+        <li><span class="tag new">New</span> Postal code search with OneMap geocoding</li>
+        <li><span class="tag new">New</span> 185 primary schools with 3 years of vacancy/balloting data (2022-2024)</li>
+        <li><span class="tag new">New</span> Phase selection (1, 2A, 2B, 2C) with colour-coded odds</li>
+        <li><span class="tag new">New</span> Year-by-year history with applicant/vacancy counts</li>
+        <li><span class="tag new">New</span> Distance-based school sorting (within 1km, 1-2km, outside 2km)</li>
+        <li><span class="tag new">New</span> WhatsApp sharing and link copy</li>
+        <li><span class="tag new">New</span> <a href="/guide.html">Complete P1 Registration Guide</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer">
+    <p><a href="/">🎒 Back to P1Buddy</a> · <a href="/guide.html">📖 P1 Guide</a></p>
+    <p>P1Buddy is a free tool. Not affiliated with MOE.</p>
+  </div>
+</body>
+</html>
