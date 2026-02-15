@@ -534,7 +534,8 @@
       
       // Share bar
       document.getElementById('shareBar').style.display = 'block';
-      const shareText = encodeURIComponent(`Check your P1 school odds! I just found out which schools near me ballot and which are safe 🎒 https://p1buddy.com`);
+      const shareUrl = postal ? `https://p1buddy.com?postal=${postal}` : 'https://p1buddy.com';
+      const shareText = encodeURIComponent(`P1 registration stress? 😰 I just found this free tool that shows your actual chances at every school near you! No more guessing — see 3 years of balloting data and personalised odds based on your citizenship and distance. Total game-changer for P1 planning! 🎒 ${shareUrl}`);
       document.getElementById('whatsappShare').href = `https://wa.me/?text=${shareText}`;
     }
     
@@ -567,12 +568,27 @@
     }
     
     function copyLink() {
-      navigator.clipboard.writeText('https://p1buddy.com').then(() => {
+      const postal = document.getElementById('postalInput')?.value;
+      const url = postal ? `https://p1buddy.com?postal=${postal}` : 'https://p1buddy.com';
+      navigator.clipboard.writeText(url).then(() => {
         const btn = event.target;
         btn.textContent = '✅ Copied!';
         setTimeout(() => btn.textContent = '📋 Copy Link', 2000);
       });
     }
+    
+    // Check for URL parameters on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const postalParam = urlParams.get('postal');
+      
+      if (postalParam && /^\d{6}$/.test(postalParam)) {
+        document.getElementById('postalInput').value = postalParam;
+        setTimeout(() => {
+          document.getElementById('searchBtn').click();
+        }, 500);
+      }
+    });
   </script>
 </body>
 </html>
