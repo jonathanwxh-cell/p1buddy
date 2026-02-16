@@ -281,16 +281,28 @@
       .then(d => { schoolsData = d; })
       .catch(e => console.error('Failed to load school data:', e));
     
+    document.getElementById('postalInput').addEventListener('input', e => {
+      e.target.value = normalizePostalInput(e.target.value);
+    });
     document.getElementById('postalInput').addEventListener('keypress', e => {
       if (e.key === 'Enter') search();
+    });
+    document.getElementById('scenarioPostalInput').addEventListener('input', e => {
+      e.target.value = normalizePostalInput(e.target.value);
     });
     document.getElementById('scenarioPostalInput').addEventListener('keypress', e => {
       if (e.key === 'Enter') runMoveScenario();
     });
     
+    function normalizePostalInput(value) {
+      return String(value || '').replace(/\D/g, '').slice(0, 6);
+    }
+
     async function search() {
-      const postal = document.getElementById('postalInput').value.trim();
-      if (!/^\d{6}$/.test(postal)) {
+      const input = document.getElementById('postalInput');
+      const postal = normalizePostalInput(input.value);
+      input.value = postal;
+      if (postal.length !== 6) {
         alert('Please enter a valid 6-digit postal code');
         return;
       }
@@ -398,8 +410,10 @@
     }
 
     async function runMoveScenario() {
-      const postal = document.getElementById('scenarioPostalInput').value.trim();
-      if (!/^\d{6}$/.test(postal)) {
+      const input = document.getElementById('scenarioPostalInput');
+      const postal = normalizePostalInput(input.value);
+      input.value = postal;
+      if (postal.length !== 6) {
         alert('Please enter a valid 6-digit postal code');
         return;
       }
