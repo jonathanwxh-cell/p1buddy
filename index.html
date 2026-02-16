@@ -102,7 +102,21 @@
     
     .disclaimer { background: #fffbeb; border: 1px solid #fde68a; border-radius: 0.5rem; padding: 0.75rem; font-size: 0.8rem; color: #92400e; margin-bottom: 1.5rem; display: none; }
 
+    .scenario-section { background: white; border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .scenario-section h3 { margin-bottom: 0.4rem; }
+    .scenario-section p { color: #64748b; font-size: 0.9rem; margin-bottom: 0.8rem; }
+    .scenario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .scenario-card { background:#fff; border:1px solid #e2e8f0; border-radius:0.75rem; padding:1rem; }
+    .scenario-card.good { border-color:#86efac; background:#f0fdf4; }
+    .scenario-card .meta { color:#475569; font-size:0.85rem; margin:0.2rem 0 0.5rem; }
+    .scenario-card .pill { display:inline-block; padding:0.15rem 0.5rem; border-radius:999px; background:#e2e8f0; color:#334155; font-size:0.75rem; margin-right:0.4rem; margin-top:0.2rem; }
+    .scenario-card .pill.good { background:#dcfce7; color:#166534; }
+    .scenario-table { width:100%; border-collapse:collapse; font-size:0.8rem; margin-top:0.5rem; }
+    .scenario-table th,.scenario-table td { border-bottom:1px solid #e2e8f0; padding:0.3rem; text-align:center; }
+    .scenario-table th { background:#f8fafc; }
+
     @media (max-width: 640px) {
+      .scenario-grid { grid-template-columns: 1fr; }
       .hero h1 { font-size: 1.5rem; }
       .phase-grid { grid-template-columns: repeat(2, 1fr); }
       .search-box { flex-direction: column; }
@@ -116,11 +130,23 @@
     <p>Enter your postal code. See how competitive every nearby school has been — for your situation.</p>
     <div class="search-box">
       <input type="text" id="postalInput" placeholder="Enter postal code (e.g. 569930)" maxlength="6" inputmode="numeric">
-      <button onclick="search()">Find Schools</button>
+      <button id="searchBtn" onclick="search()">Find Schools</button>
     </div>
+    <p style="margin-top:1rem;font-size:0.95rem;opacity:0.95;"><a href="#moveScenario" style="color:#fef3c7;font-weight:600;text-decoration:underline;">🏡 What if I move? Explore another postal code</a></p>
   </div>
   
   <div class="container">
+    <div class="scenario-section" id="moveScenario">
+      <h3>🏡 What if I move?</h3>
+      <p>Try any Singapore postal code and see schools within <strong>1km</strong> and <strong>1-2km</strong> with historical Phase 2C competitiveness.</p>
+      <div class="search-box" style="max-width:none;">
+        <input type="text" id="scenarioPostalInput" placeholder="Try another postal code (e.g. 238801)" maxlength="6" inputmode="numeric">
+        <button onclick="runMoveScenario()">Run scenario</button>
+      </div>
+      <div id="scenarioSummary" style="margin-top:0.75rem;color:#475569;font-size:0.9rem;"></div>
+      <div id="scenarioResults" class="scenario-grid" style="margin-top:0.8rem;"></div>
+    </div>
+
     <div class="loading" id="loading">
       <div class="spinner"></div>
       <p style="margin-top:1rem;color:#64748b;">Finding schools near you...</p>
@@ -258,6 +284,9 @@
     document.getElementById('postalInput').addEventListener('keypress', e => {
       if (e.key === 'Enter') search();
     });
+    document.getElementById('scenarioPostalInput').addEventListener('keypress', e => {
+      if (e.key === 'Enter') runMoveScenario();
+    });
     
     async function search() {
       const postal = document.getElementById('postalInput').value.trim();
@@ -305,6 +334,93 @@
       const dLng = (lng2 - lng1) * Math.PI / 180;
       const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function getPhase2CScore(school) {
+      let count = 0;
+      let totalVacancyDelta = 0;
+      for (const phases of Object.values(school.history || {})) {
+        const d = phases['2C'];
+        if (!d) continue;
+        count++;
+        totalVacancyDelta += (d.vacancies || 0) - (d.applicants || 0);
+      }
+      if (!count) return -9999;
+      return totalVacancyDelta / count;
+    }
+
+    function getAvailablePhases(school) {
+      const set = new Set();
+      for (const phases of Object.values(school.history || {})) {
+        for (const k of Object.keys(phases || {})) set.add(k);
+      }
+      const ordered = ['1','2A','2B','2C','2CS'];
+      return ordered.filter(k => set.has(k)).map(k => (k === '2CS' ? '2C(S)' : k));
+    }
+
+    async function geocodePostal(postal) {
+      const res = await fetch(`https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${postal}&returnGeom=Y&getAddrDetails=Y&pageNum=1`);
+      const data = await res.json();
+      if (!data.found || data.found === 0) return null;
+      return {
+        lat: parseFloat(data.results[0].LATITUDE),
+        lng: parseFloat(data.results[0].LONGITUDE)
+      };
+    }
+
+    function renderScenarioCard(s) {
+      const dist = (s.distance / 1000).toFixed(2);
+      const in1km = s.distance <= 1000;
+      const phase2cScore = getPhase2CScore(s);
+      const goodChance = phase2cScore >= 15;
+      const phases = getAvailablePhases(s).map(p => `<span class="pill">${p}</span>`).join('');
+
+      const years = Object.keys(s.history || {}).sort();
+      const rows = years.map(y => {
+        const d = s.history[y]?.['2C'];
+        if (!d) return '';
+        const status = d.oversubscribed ? '⚠️ Ballot' : '✅ No ballot';
+        return `<tr><td>${y}</td><td>${d.vacancies ?? '-'}</td><td>${d.applicants ?? '-'}</td><td>${status}</td></tr>`;
+      }).join('');
+
+      return `<div class="scenario-card ${goodChance ? 'good' : ''}">
+        <div style="display:flex;justify-content:space-between;gap:0.5rem;align-items:flex-start;">
+          <strong>${s.name} Primary School</strong>
+          <span class="pill ${goodChance ? 'good' : ''}">${goodChance ? 'Good 2C history' : 'Tighter 2C history'}</span>
+        </div>
+        <div class="meta">${dist} km · ${in1km ? 'Within 1km' : '1-2km'}</div>
+        <div>${phases}</div>
+        <table class="scenario-table">
+          <thead><tr><th>Year</th><th>2C Vac</th><th>2C Apps</th><th>Outcome</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    }
+
+    async function runMoveScenario() {
+      const postal = document.getElementById('scenarioPostalInput').value.trim();
+      if (!/^\d{6}$/.test(postal)) {
+        alert('Please enter a valid 6-digit postal code');
+        return;
+      }
+      if (!schoolsData) {
+        alert('School data still loading, please wait a moment.');
+        return;
+      }
+
+      const point = await geocodePostal(postal);
+      if (!point) {
+        alert('Postal code not found. Please check and try again.');
+        return;
+      }
+
+      const all = schoolsData.map(s => ({ ...s, distance: haversine(point.lat, point.lng, s.lat, s.lng) }));
+      const within1 = all.filter(s => s.distance <= 1000).sort((a,b)=>a.distance-b.distance);
+      const within2 = all.filter(s => s.distance > 1000 && s.distance <= 2000).sort((a,b)=>a.distance-b.distance);
+      const picked = [...within1, ...within2];
+
+      document.getElementById('scenarioSummary').innerHTML = `${within1.length} school(s) within 1km · ${within2.length} school(s) within 1-2km of <strong>${postal}</strong>. Sorted by distance.`;
+      document.getElementById('scenarioResults').innerHTML = picked.map(renderScenarioCard).join('') || '<div style="color:#64748b;">No schools found within 2km.</div>';
     }
     
     function getPersonalisedOdds(school, phase, distance) {
